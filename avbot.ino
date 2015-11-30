@@ -1,4 +1,5 @@
 
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 
@@ -7,6 +8,9 @@
 #endif
 
 #include <I2C.h>
+
+unsigned long lastFiredTime;
+unsigned long interval;
 
 //ALEX MOX CODE
 #include <inttypes.h>
@@ -30,7 +34,6 @@ static int16_t debug1, debug2, debug3, debug4, free_memory;
 
  
 HardwareSerial &serial = Serial1;
-
  
 //END ALEXMOS
 
@@ -268,19 +271,24 @@ void motor_cb( const geometry_msgs::Twist& cmd_msg){
   fb_msg.angular.z = M3;
   fb_msg.linear.x = M4;
   fb_msg.linear.y = M5;
- // fb_msg[1].data=M2;
+  fb_msg[1].data=M2;
   pub_feedback.publish(&fb_msg);
   */
   
- // Serial.println("feedback()");
+  // Serial.println("feedback()");
 
- 
+  
   
 }
 
 void ex_failsafe( const std_msgs::Int8& cmd_msg){
   //Serial.println(cmd_msg.data);
   joystick_status = cmd_msg;
+  
+   unsigned long now = millis ();
+   interval = now - lastFiredTime;
+   lastFiredTime = now;
+  
 }
 
 
@@ -334,12 +342,16 @@ void setup(){
   delay(100); // Waits to make sure everything is powered up before sending or receiving data  
   I2c.timeOut(50); // Sets a timeout to ensure no locking up of sketch if I2C communication fails
   //ENDLIDAR
+
+ 
+  interval = 0;
 }
+
 
 
 void loop(){
 
-  /*
+
     //ALEXMOS
   cur_time_ms = millis();
  
@@ -361,7 +373,7 @@ void loop(){
   //ENDALEXMOS
   
   
-  */
+  
 
   
   
@@ -376,12 +388,22 @@ void loop(){
    
  //JOYSTICK FAILSAFE
  
- //if (joystick_status.data != 1) {
- //  OutputCh(2, 0);//pin1 thr
- //} else {
+ if (joystick_status.data != 1) {
+   OutputCh(2, 0);//pin1 thr
+ } else {
    OutputCh(2, M3);//pin1 thr
- //}
+ }
 
+
+ unsigned long now = millis ();
+ unsigned long interval_2 = now - lastFiredTime;
+
+ //Serial.println("LAST FIRED TIME"); 
+ //Serial.println(interval_2);
+
+ if (interval_2 > 3000) {
+  joystick_status.data = 0;
+ }
 
 
 
