@@ -351,7 +351,7 @@ void setup(){
 
 void loop(){
 
-
+  /*
     //ALEXMOS
   cur_time_ms = millis();
  
@@ -373,7 +373,7 @@ void loop(){
   //ENDALEXMOS
   
   
-  
+  */
 
   
   
